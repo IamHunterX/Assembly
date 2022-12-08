@@ -1,0 +1,83 @@
+; You may customize this and other start-up templates; 
+; The location of this template is c:\emu8086\inc\0_com_template.txt
+org 100h 
+.DATA
+str DB 'HASSAM'  
+size DW 6 
+temp dw 20
+Initial dw 0
+start dw 0 
+T dw 0 
+C DW 0
+swap dw 0
+.CODE
+mov Initial,(10-1)*160+(45-10)*2
+mov start,(2-1)*160+(45-10)*2
+mov AX,0xB800
+mov ES,AX 
+mov SI,Initial  ;printing in centre
+mov AH,0x42  
+mov BX,0
+mov CX,size
+
+
+loop1:
+mov AL, [str+BX]
+inc BX
+mov ES:SI,AX  ;moving value at AX into segment ES at offset SI
+
+add SI,160 
+Loop LOOP1
+
+
+CLEAR:
+    mov C,SI
+    DEC BX
+    jmp loop2
+    
+    
+loop2: 
+INC T
+mov AL,[str+BX]
+dec BX
+mov ES:SI,AX  ;moving value at AX into segment ES at offset SI
+
+SUB SI,160 
+mov ES:SI,0
+cmp t,6
+JNE loop2
+jmp ClearAgain
+
+ClearAgain:
+    mov swap,SI
+    mov SI,C
+    ADD SI,160
+    MOV T,0
+    mov BX,6
+    mov DI,swap
+    mov C,DI
+    JMP CLEAR
+
+
+
+loopi:
+MOV es:si,'L'
+mov CX,size
+mov SI,Initial ;moving SI at that offset again
+top:
+mov AX, word ptr ES:SI  ;moving the value at this offset in AX
+mov ES:SI+160,AX        ;moving in above line and printing F there
+mov ES:SI,0x0720        ;clearing the place of F below where 07 is for black background and then 20 is for inserting blank space there
+add si,2
+Loop top
+add Initial,160
+mov SI,Initial
+inc temp
+cmp temp,25
+jle loopi
+MOV cx,size
+mov Initial,(2-1)*160+(45-10)*2
+mov bx,0
+mov temp,1
+mov SI,(2-1)*160+(45-10)*2
+jmp loop1
